@@ -6,44 +6,39 @@ using MathNet.Numerics.Distributions;
 
 public class Chart_class : MonoBehaviour
 {
-    //класс графика
+    //chart class
 
-    //параметр n
+    //n parameter
     public static short n;
-    //шаг вероятности
+    //probability step
     public static float probStep = 0;
-    //материал полигонального полотна
     public Material polyMeshMaterial;
-    //объект срезов графика
+    //chart slice object
     public Transform Charts;
-    //шаблон точки
     public GameObject dotPrefab;
-    //аниматор затухающего экрана
     public Animator fadedScreen;
 
-    //полигональное полотно
     GameObject polyMesh;
-    //выбранное распределение
     private int distr;
-    //зарезервированный параметр n
+    //reserved n parameter
     private short n_r;
 
     private float[] Calculate(float pi)
     {
-        //функция вычисления координат точек среза
+        //calculating the coordinates of the slice points
 
-        //массив точек среза
+        //points array
         double[] y;
         if (distr == 0)
         {
-            //биномиальное распределение
+            //binomial
 
             y = new double[n + 1];
             for (short x = 0; x <= n; x++) y[x] = Binomial.PMF(pi, n, x);
         }
         else
         {
-            //отрицательное биномиальное распределение
+            //negative binomial
 
             n = n_r;
 
@@ -53,26 +48,23 @@ public class Chart_class : MonoBehaviour
             n = 50;
         }
 
-        //возврат массива точек среза в качестве значения функции
         return y.Select(x => (float)Math.Round(x, 6)).ToArray();
     }
 
     private void Build_aChart(float pi, short num)
     {
-        //построение среза
+        //building the slice
 
-        //задание параметров среза как объекта
         GameObject chart = new GameObject("Chart" + num);
         chart.transform.parent = Charts;
         chart.tag = "Chart";
         chart.transform.localPosition = Vector3.zero;
 
-        //задание массива точек среза
+        //points array
         float[] y = Calculate(pi);
-        //размещение точек на срезе
+        //points placement
         for (short x = 0; x <= n; x++)
         {
-            //задание параметров точки как объекта
             GameObject dot = Instantiate(dotPrefab, chart.transform);
             dot.name = "Value" + x;
             dot.tag = "Value";
@@ -83,15 +75,13 @@ public class Chart_class : MonoBehaviour
 
     private void BuildPolyMesh(short nMeshes)
     {
-        //построение полигонального полотна
+        //building poly mesh
 
-        //вершины полотна
         Vector3[] vertices = GameObject.FindGameObjectsWithTag("Value").Select(x => x.transform.position).ToArray();
-        //массив номеров вершин
         int[] indices = new int[nMeshes * ((n + 1) * 2 - 2) * 3];
-        //переменная направления нумерации вершин
+        //vertices numbering direction
         short c = -1;
-        //нумерация вершин
+        //vertices numbering
         for (short i = 0; i < nMeshes; i++)
         {
             for (short j = 0; j < n; j++)
@@ -105,14 +95,12 @@ public class Chart_class : MonoBehaviour
             }
         }
 
-        //задание параметров поверхности полотна
         Mesh theMesh = new Mesh();
         theMesh.vertices = vertices;
         theMesh.triangles = indices;
         theMesh.RecalculateNormals();
         theMesh.RecalculateBounds();
 
-        //задание параметров полотна
         polyMesh = new GameObject("PolyMesh");
         polyMesh.transform.parent = gameObject.transform;
         polyMesh.AddComponent(typeof(MeshRenderer));
@@ -127,52 +115,49 @@ public class Chart_class : MonoBehaviour
 
     public IEnumerator CreateFullChart(int distr)
     {
-        //параллельный метод построения графика
+        //building the chart (async)
 
-        //определение выбранного распределения
+        //setting the chosen distribution
         this.distr = distr;
-        //сохраняем значение n
+        //saving current n
         n_r = n;
 
-        //запуск анимации затемнения экрана
+        //fading the screen
         fadedScreen.Play("ScreenFading_in");
-        //ожидание окончания анимации
         yield return new WaitForSeconds(0.134f);
 
-        //удаление предыдущего графика
+        //deleting previous chart
         foreach (Transform child in Charts) Destroy(child.gameObject);
         foreach (GameObject aPolyMesh in GameObject.FindGameObjectsWithTag("PolyMesh")) Destroy(aPolyMesh);
-        //сброс камеры
+        //camera reset
         transform.rotation = new Quaternion(0, 0, 0, 1);
-        //ожидание смены кадров после удаления
         yield return new WaitForEndOfFrame();
 
-        //параметр вероятности среза
+        //probability of a slice
         float pi = probStep;
-        //количество срезов
+        //amount of slices
         short nCharts = (short)Mathf.CeilToInt(1 / probStep);
-        //построение срезов графика
+        //building slices
         Build_aChart(0.02f, 0);
         for (short num = 1; num <= nCharts; num++)
         {
             Build_aChart(pi, num);
 
-            //увеличение параметра вероятности следующего среза на шаг
+            //increasing  probability of the next slice by one step
             pi = (float)Math.Round(pi + probStep, 6);
-            //остался последний срез — значение его параметра вероятности равно 0,98
+            //last slice remains - value of its probability parameter must be 0.98
             if (pi > 0.9f) pi = 0.98f;
         }
 
-        //строим полигональное полотно
+        //building poly mesh
         BuildPolyMesh(nCharts);
 
-        //возавращаем значение n при отрицательном распределении
+        //returning n if distribution is negative
         n = n_r;
 
-        //запуск анимации возврата экрана из затемненного состояния
+        //fading the screen out
         fadedScreen.Play("ScreenFading_out");
-
-        //завершение работы метода
+        
         yield return null;
     }
 }

@@ -3,43 +3,37 @@ using UnityEngine.UI;
 
 public class UI_Build_class : MonoBehaviour
 {
-    //класс поведения кнопки построения графика
+    //behavior of the chart building button
 
-    //курсор недоступности кнопки
+    //button unavailable cursor
     public Texture2D cursorDisabled;
-    //объект графического интерфейса
     public GameObject UI;
 
-    //флаг нахождения курсора над кнопкой
+    //mouse over a button flag
     bool mouseOver;
 
     private void FixedUpdate()
     {
-        //метод инструкций на каждый синхронизированный кадр
-
-        //-----------------------
-        //возврат стандартного курсора при доступности кнопки
+        //return the standard cursor when a button is available
 
         if (mouseOver && GetComponent<Button>().interactable) OnMouseLeft_Disabled();
     }
 
     public void OnMouseEntered_Disabled()
     {
-        //при наведении курсора на недоступную кнопку
+        //on mouse over an unavailable button
 
-        //индикация нахождения курсора над кнопкой
         mouseOver = true;
-        //активация курсора недоступности кнопки
+        //showing the cursor of unavailability
         if (!GetComponent<Button>().interactable) Cursor.SetCursor(cursorDisabled, new Vector2(8, 8), CursorMode.ForceSoftware);
     }
 
     public void OnMouseLeft_Disabled()
     {
-        //при отведении курсора от недоступной кнопки
+        //on mouse left an unavailable button
 
-        //индикация отсутствия курсора над кнопкой
         mouseOver = false;
-        //возврат стандартного курсора
+        //return the standard cursor
         Cursor.SetCursor(UI.GetComponent<UI_class>().cursorDefault, Vector2.zero, CursorMode.ForceSoftware);
     }
 }

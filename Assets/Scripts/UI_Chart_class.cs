@@ -2,18 +2,17 @@
 
 public class UI_Chart_class : MonoBehaviour
 {
-    //класс поведения графика
+    //chart behavior
 
-    //курсор вращения камеры
+    //rotate cursor
     public Texture2D cursorRotate;
-    //объект графического интерфейса
     public GameObject UI;
 
     private void OnMouseDrag()
     {
-        //при перетаскивании курсора мыши с нажатой левой кнопкой над графиком
+        //on mouse dragging the chart
 
-        //вращение камеры
+        //camera rotating
         float rotX = Input.GetAxis("Mouse X") * 100 * Mathf.Deg2Rad;
         float rotY = Input.GetAxis("Mouse Y") * 100 * Mathf.Deg2Rad;
         transform.Rotate(Vector3.forward, rotY);
@@ -22,17 +21,17 @@ public class UI_Chart_class : MonoBehaviour
 
     private void OnMouseDown()
     {
-        //при нажатии левой кнопкой мыши на график
+        //on clicking the chart
 
-        //активация курсора вращения
+        //showing rotate cursor
         Cursor.SetCursor(cursorRotate, new Vector2(12, 12), CursorMode.ForceSoftware);
     }
 
     private void OnMouseUp()
     {
-        //при снятии нажатия левой кнопкой мыши на график
+        //on unclicking the chart
 
-        //возврат стандартного курсора
+        //return the standard cursor
         Cursor.SetCursor(UI.GetComponent<UI_class>().cursorDefault, Vector2.zero, CursorMode.ForceSoftware);
     }
 }
