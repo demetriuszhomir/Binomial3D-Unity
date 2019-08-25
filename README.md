@@ -1,5 +1,5 @@
 # Binomial distribution 3D
-Spatial representation of random variables having binomial distribution
+Spatial representation of random variables having the binomial distribution
 
 ------------
 
